@@ -1,0 +1,35 @@
+#include<stdio.h>
+int main(void)
+{
+	char x[1000],y[10];
+	int i=0,j,na=0,nw=0,count=0,sum=0;
+	printf("请输入一句英文\n");
+	while((x[i] = getchar()) != '\n')
+	{
+	na++;
+	i++;
+	}
+	i=0;
+	printf("请输入要的单词\n");
+	while((y[i] = getchar()) != '\n'){
+	nw++;
+	i++;
+	}
+	for (i = 0; i < na; i++)
+	{   count = 0;
+		if(x[i] == y[0])
+		{
+			for(j=0;j<nw;j++)
+			{
+				if(x[i+j] == y[j])
+				{
+					count++;
+				}
+			}
+			if(count == nw)sum++; 
+		 }
+
+	}
+	printf("单词个数:%d\n",sum);
+	return 0;
+}
