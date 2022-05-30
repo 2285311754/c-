@@ -1,0 +1,104 @@
+//学号.姓名.性别.院(系)/部.专业.行政班级.卡号.密码.状态.开户行.开户时间.账户余额
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+typedef struct ATM_ACCOUNT{
+	char xh[10],xm[20],xb[3],yxb[50],zy[30],xzbj[20],kh[20],mm[7],zt,khh[40];
+	long khsj;
+	float zhye;
+}Atm_account;
+int max_account,cnt_account;//max_account---账户数的上界值； cnt_account-----当前的账户个数！！ 
+Atm_account *p_account;
+void init(){
+	//1.读 init.txt 中的初始化参数！！！max_account等！
+	FILE *fp;
+	int i;
+	if((fp=fopen("data\\init.txt","r"))==NULL){
+		printf("初始化文件打开失败，程序退出！");return ;
+	}
+	fscanf(fp,"max_account=%d;",&max_account);
+	printf("max_account=%d\n",max_account);
+	fclose(fp);
+	//2.用max_account和malloc函数初始化p_account;
+	p_account=(Atm_account *)malloc(max_account*sizeof(Atm_account));
+	if(p_account==NULL){
+		printf("内存分配失败，程序退出！");return ;
+	}
+	//3.把atm_account.dat中的账户信息读入p_account;fread
+	if((fp=fopen("data\\atm_account.dat","rb"))==NULL){
+		printf("初始化文件打开失败，程序退出！");return ;
+	}
+	fread(	&cnt_account,sizeof(int),1,fp);//先读账户总数；  
+	printf("账户总数为%d！\n",cnt_account);
+	
+	i=fread( p_account, sizeof(Atm_account), cnt_account, fp );//再读每个账户的信息 
+	printf("已读取%d个账户的信息！\n",i);
+	fclose(fp);
+	
+}
+void dzhkh(){
+	int i;
+	//1.录入信息
+	puts("学号");gets(p_account[cnt_account].xh);
+	puts("姓名");gets(p_account[cnt_account].xm);
+	puts("性别");gets(p_account[cnt_account].xb);
+	puts("院(系)/部");gets(p_account[cnt_account].yxb);
+	puts("专业");gets(p_account[cnt_account].zy);
+	puts("行政班级");gets(p_account[cnt_account].xzbj);
+	puts("卡号");gets(p_account[cnt_account].kh);
+	puts("开户行");gets(p_account[cnt_account].khh);
+	strcpy(p_account[cnt_account].mm,"000000");
+	p_account[cnt_account].zt='0';
+	p_account[cnt_account].khsj=time(0);
+	cnt_account++;
+	//2.检查合法性---学生自己完成
+	//3.存盘
+	//文件操作实现------二进制文件
+
+}
+void ckzhxx(){//查看账户信息
+	char xh[10];
+	int flag=0,i;
+	puts("请输入学号：");
+	gets(xh);
+	
+	for(i=0;i<cnt_account;i++){
+		if(strcmp(xh,p_account[i].xh)==0){
+			flag=1;break;
+		}
+	}
+	if(flag==1){//找到了，显示：
+		printf("%s的账户信息如下：\n",xh);
+		printf("%10s%10s%20s%20s\n",p_account[i].xh,p_account[i].xm,p_account[i].kh,p_account[i].xzbj);
+	}
+	else{//没找到
+		printf("%s的账户信息未找到！",xh);
+	}
+}
+void save(){
+	FILE *fp;
+	int i;
+	if((fp=fopen("data\\atm_account.dat","wb"))==NULL){
+		printf("写文件打开失败！存盘失败！\n");return;
+	}
+	// int fwrite( const void *buffer, size_t size, size_t count, FILE *stream );
+	fwrite(&cnt_account,sizeof(int),1,fp);//先写账户数 
+	i=fwrite(p_account,sizeof(Atm_account),cnt_account,fp);//写每个账户的信息 
+	if(i==0){
+		printf("写文件失败！\n");
+	}
+	else
+		printf("写文件成功！\n");
+	fclose(fp);	
+}
+
+int main(){
+
+	init();
+	dzhkh();
+	ckzhxx();//查看账户信息
+	save(); 
+	return 0;
+}
