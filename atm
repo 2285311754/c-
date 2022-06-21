@@ -1,104 +1,438 @@
-//学号.姓名.性别.院(系)/部.专业.行政班级.卡号.密码.状态.开户行.开户时间.账户余额
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include<stdio.h>
+#include<process.h>
+#include<stdlib.h>
+#include<string.h>
+int *p;                                               //全局变量
+int q;
+struct account
+{
+	int num;
+	char name[20];
+	int mm;
+	float money;
+}str[3]={{111,"电竞哥",111,100},{222,"普信那啥",222,200},{333,"李八",333,300}};
 
-typedef struct ATM_ACCOUNT{
-	char xh[10],xm[20],xb[3],yxb[50],zy[30],xzbj[20],kh[20],mm[7],zt,khh[40];
-	long khsj;
-	float zhye;
-}Atm_account;
-int max_account,cnt_account;//max_account---账户数的上界值； cnt_account-----当前的账户个数！！ 
-Atm_account *p_account;
-void init(){
-	//1.读 init.txt 中的初始化参数！！！max_account等！
+void s()                                              //刷新用户的数据
+{
+	int i;
 	FILE *fp;
-	int i;
-	if((fp=fopen("data\\init.txt","r"))==NULL){
-		printf("初始化文件打开失败，程序退出！");return ;
+	fp=fopen("C:\\Users\\chen\\xx.txt","w");
+	for(i=0;i<3;i++)
+	{
+		fscanf(fp,"%d\t%s\t%d\t%f\n",&str[i].num,&str[i].name,&str[i].mm,&str[i].money);
+		printf("%d\t%s\t%d\t%f\n",str[i].num,str[i].name,str[i].mm,str[i].money);
 	}
-	fscanf(fp,"max_account=%d;",&max_account);
-	printf("max_account=%d\n",max_account);
 	fclose(fp);
-	//2.用max_account和malloc函数初始化p_account;
-	p_account=(Atm_account *)malloc(max_account*sizeof(Atm_account));
-	if(p_account==NULL){
-		printf("内存分配失败，程序退出！");return ;
-	}
-	//3.把atm_account.dat中的账户信息读入p_account;fread
-	if((fp=fopen("data\\atm_account.dat","rb"))==NULL){
-		printf("初始化文件打开失败，程序退出！");return ;
-	}
-	fread(	&cnt_account,sizeof(int),1,fp);//先读账户总数；  
-	printf("账户总数为%d！\n",cnt_account);
-	
-	i=fread( p_account, sizeof(Atm_account), cnt_account, fp );//再读每个账户的信息 
-	printf("已读取%d个账户的信息！\n",i);
-	fclose(fp);
-	
 }
-void dzhkh(){
-	int i;
-	//1.录入信息
-	puts("学号");gets(p_account[cnt_account].xh);
-	puts("姓名");gets(p_account[cnt_account].xm);
-	puts("性别");gets(p_account[cnt_account].xb);
-	puts("院(系)/部");gets(p_account[cnt_account].yxb);
-	puts("专业");gets(p_account[cnt_account].zy);
-	puts("行政班级");gets(p_account[cnt_account].xzbj);
-	puts("卡号");gets(p_account[cnt_account].kh);
-	puts("开户行");gets(p_account[cnt_account].khh);
-	strcpy(p_account[cnt_account].mm,"000000");
-	p_account[cnt_account].zt='0';
-	p_account[cnt_account].khsj=time(0);
-	cnt_account++;
-	//2.检查合法性---学生自己完成
-	//3.存盘
-	//文件操作实现------二进制文件
 
+void welcome()                        //欢迎使用ATM系统
+{
+	printf("***********************************************\n\t欢迎使用那啥ATM机\t\n   Welcome to the ATM machine\t\n***********************************************\n");
 }
-void ckzhxx(){//查看账户信息
-	char xh[10];
-	int flag=0,i;
-	puts("请输入学号：");
-	gets(xh);
-	
-	for(i=0;i<cnt_account;i++){
-		if(strcmp(xh,p_account[i].xh)==0){
-			flag=1;break;
+
+void enter1()                           //进入系统，输入账号密码
+{
+	void welcome();
+	void s6();
+	int judge(int zh,int password);
+	int i,j,zh,password,times=1;
+	int a;
+	for(i=0;i<3;i++)
+	{
+		printf("账户：（若无账户请输入0进行开户）");
+		scanf("%d",&zh);
+		if(zh==0)
+		{
+			system("cls");
+			s6();
+		}
+		printf("密码：");
+		scanf("%d",&password);
+		j=judge(zh,password);
+		if(j)
+		{
+			printf("登录成功！");
+			system("pause");
+			system("cls");
+			break;
+		}
+		else
+		{
+			printf("账户或密码错误！请重新输入！\n");
+			system("pause");
+	        system("cls");
+			times++;
+			if(times==4)
+			{
+				printf("错误三次，将退出系统！\n");
+				system("pause");
+				system("cls");
+				welcome();
+			}
 		}
 	}
-	if(flag==1){//找到了，显示：
-		printf("%s的账户信息如下：\n",xh);
-		printf("%10s%10s%20s%20s\n",p_account[i].xh,p_account[i].xm,p_account[i].kh,p_account[i].xzbj);
+}
+
+int language()                      //选择语言
+{
+	int a;
+	printf("请选择你所需要的语言1.中文 2.英文\nPlease select the language you want1.Chinese 2.English\n");
+	scanf("%d",&a);
+	if(a==1)
+	{
+		return a;
 	}
-	else{//没找到
-		printf("%s的账户信息未找到！",xh);
+	if(a==2)
+	{
+		return a;
 	}
 }
-void save(){
-	FILE *fp;
+
+int judge(int a,int b)               //判断账号密码是否正确
+{
 	int i;
-	if((fp=fopen("data\\atm_account.dat","wb"))==NULL){
-		printf("写文件打开失败！存盘失败！\n");return;
+	for(i=0;i<100;i++)
+	{
+		if(a==str[i].num&&b==str[i].mm)
+		{
+			p=&i;
+			q=*p;
+			return 1;
+		}
 	}
-	// int fwrite( const void *buffer, size_t size, size_t count, FILE *stream );
-	fwrite(&cnt_account,sizeof(int),1,fp);//先写账户数 
-	i=fwrite(p_account,sizeof(Atm_account),cnt_account,fp);//写每个账户的信息 
-	if(i==0){
-		printf("写文件失败！\n");
+	return 0;
+}
+
+void dating1()                             //汉语主要功能
+{
+	void s1();
+	void s2();
+	void s3();
+	void s4();
+	void s5();
+	void s6();
+	void end();
+	int i;
+	printf("请选择功能1.查询2.修改密码3.转账4.存款5.取款6.退出\n");
+	scanf("%d",&i);
+	system("cls");
+	switch(i)
+	{
+	case 1:s1();
+	case 2:s2();
+	case 3:s3();
+	case 4:s4();
+	case 5:s5();
+	case 6:end();
+	}
+}
+
+void s1()                                                      //功能一查询
+{
+	void end();
+	int i;
+	printf("%d\t%s\t%f\n",str[q].num,str[q].name,str[q].money);
+	system("pause");
+	system("cls");
+	printf("\n1.返回主大厅2.结束\n");
+	scanf("%d",&i);
+	system("cls");
+	if(i==1)
+	{
+		dating1();
+	}
+	if(i==2)
+	{
+		end();
+	}
+}
+
+void s2()                                                       //功能二修改密码
+{
+	void dating1();
+	void end();
+	void s();
+	int a,b,c,d;
+	printf("请输入旧密码：");
+	scanf("%d",&a);
+	if(a==str[q].mm)
+	{
+cx3:
+		printf("请输入新密码：");
+		scanf("%d",&b);
+		system("cls");
+		printf("请再次确认密码");
+		scanf("%d",&c);
+		if(b==c)
+		{
+			printf("密码修改成功！请牢记您的密码！");
+			str[q].mm=b;
+			s();
+			system("pause");
+			system("cls");
+			printf("\n1.返回主大厅2.结束\n");
+			scanf("%d",&d);
+			system("cls");
+			if(d==1)
+			{
+				dating1();
+			}
+			if(d==2)
+			{
+				end();
+			}
+		}
+		else
+		{
+			printf("输入的密码不一致，请重新输入！");
+			goto cx3;
+		}
 	}
 	else
-		printf("写文件成功！\n");
-	fclose(fp);	
+	{
+		printf("输入的密码不对，请重新输入！");
+		system("pause");
+		system("cls");
+		s2();
+	}
 }
 
-int main(){
+void s3()                                                //功能三转账
+{
+	int tiqu(int a);
+	void end();
+	int s31(int a);
+	int i,j,c,d;
+	float b;
+	printf("请输入要转账的用户：\n");
+	scanf("%d",&c);
+	j=tiqu(c);
+	if(j==q)
+	{
+		printf("无法转给自己！请重新操作！");
+		system("pause");
+		system("cls");
+		s3();
+	}
+	i=s31(c);
+	if(i)
+	{
+		printf("请输入转账金额：");
+		scanf("%f",&b);
+		if(str[q].money>=b)
+		{
+			system("cls");
+			printf("转账成功！\n");
+			str[q].money=str[q].money-b;
+			str[j].money=str[j].money+b;
+			printf("您的余额为：%f\n",str[q].money);
+			s();
+			system("pause");
+			system("cls");
+			printf("\n1.返回主大厅2.结束\n");
+			scanf("%d",&d);
+			system("cls");
+			if(d==1)
+			{
+				dating1();
+			}
+			if(d==2)
+			{
+				end();
+			}
+		}
+		else
+		{
+			printf("您的余额不足！请重新操作！");
+			system("pause");
+			system("cls");
+			s3();
+		}
+	}
+}
 
-	init();
-	dzhkh();
-	ckzhxx();//查看账户信息
-	save(); 
-	return 0;
+int s31(int a)                                   //功能三子函数1
+{
+	void s3();
+	int i;
+	for(i=0;i<100;i++)
+	{
+		if(a==str[i].num)
+		{
+			return 1;
+		}
+	}
+	printf("转账用户不存在，请重新输入！");
+	system("pause");
+	system("cls");
+	s3();
+}
+
+void s4()                                             //功能四存款
+{
+	void end();
+	void dating1();
+	int a;
+	void s();
+	float i;
+	printf("请存入金额：");
+	scanf("%f",&i);
+	str[q].money=str[q].money+i;
+	printf("您的余额为：%f",str[q].money);
+	system("pause");
+	system("cls");
+	printf("\n1.返回主大厅2.结束\n");
+	scanf("%d",&a);
+	system("cls");
+	if(a==1)
+	{
+		dating1();
+	}
+	if(a==2)
+	{
+		end();
+	}
+}
+
+void s5()                                             //功能五取款
+{
+	void end();
+	void dating1();
+	int a;
+	void s();
+	float i;
+	printf("请取款金额！\n");
+	scanf("%f",&i);
+	if(i<=str[q].money)
+	{
+		str[q].money=str[q].money-i;
+		printf("您的余额为：%f",str[q].money);
+		system("pause");
+	    system("cls");
+	    printf("作\n1.返回主大厅2.结束\n");
+	    scanf("%d",&a);
+		system("cls");
+		if(a==1)
+		{
+			dating1();
+		}
+		if(a==2)
+		{
+			end();
+		}
+	}
+	else
+	{
+		printf("您的账户余额不足，请重新操作！");
+		system("pause");
+		system("cls");
+		s5();
+	}
+}
+
+void s6()                                                     //开户功能
+{
+	void end();
+	void dating1();
+	int s61(int a);
+	int a,b,c,d,x;
+	char i[20],j[20];
+	FILE *fp;
+	printf("请输入您的姓名和正确的手机号！\n");
+	scanf("%s%s",&i,&j);
+	if(strlen(j)==11)
+	{
+cx1:
+		printf("开户成功，请输入您的账户！");
+		scanf("%d",&a);
+		b=s61(a);
+		if(b==1)
+		{
+cx2:
+			printf("请输入密码！");
+			scanf("%d",&c);
+			system("cls");
+			printf("请再次输入密码！");
+			scanf("%d",&d);
+			system("cls");
+			if(c==d)
+			{
+				printf("恭喜您开户成功！请记住您的账户%d和密码%d",a,c);
+				system("pause");
+	            system("cls");
+	            printf("\n1.返回主大厅2.结束\n");
+	            scanf("%d",&x);
+				if(x==1)
+					dating1();
+				if(x==2)
+					end();
+			}
+			else
+			{
+				printf("两次输入的密码不一致，请重新输入！");
+				system("pause");
+				system("cls");
+				goto cx2;
+			}
+		}
+		else
+		{
+			printf("抱歉！您输入的账户已被占用，请重新输入！");
+			system("pause");
+			system("cls");
+			goto cx1;
+		}
+	}
+}
+
+int s61(int a)                                                    //开户功能子函数1
+{
+	int i;
+	for(i=0;i<100;i++)
+	{
+		if(a==str[i].num)
+		{
+			return 0;
+		}
+	}
+	return 1;
+}
+
+void end()
+{
+	printf("掰掰");
+}
+
+int tiqu(int a)                                       //将用户的下标提取出来
+{
+	int i;
+	for(i=0;i<100;i++)
+	{
+		if(a==str[i].num)
+		{
+			return i;
+		}
+	}
+}
+
+int main(void)
+{
+	int i;
+	welcome();                                        //调用welcome函数
+	system("pause");
+	system("cls");
+    i=language();                                   //调用language函数
+	system("cls");
+	if(i==1)
+	{
+		printf("欢迎使用！\n");                      //中文系统
+		system("pause");
+     	system("cls");
+		enter1();                                    //调用enter1函数
+		dating1();
+	}
+	if(i==2)
+	{
+		printf("Welcome to use！\n");                   //英文系统
+	}
 }
